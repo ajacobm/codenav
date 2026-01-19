@@ -10,17 +10,25 @@ from unittest.mock import patch, MagicMock
 
 # Mock litellm before imports
 mock_litellm = MagicMock()
-mock_embedding_response = MagicMock()
-mock_embedding_response.data = [
-    {"embedding": [0.1, 0.2, 0.3, 0.4, 0.5]},
-    {"embedding": [0.6, 0.7, 0.8, 0.9, 1.0]}
-]
-mock_embedding_response.model = "text-embedding-3-small"
-mock_embedding_response.usage = MagicMock()
-mock_embedding_response.usage.prompt_tokens = 10
-mock_embedding_response.usage.total_tokens = 10
 
-mock_litellm.embedding = MagicMock(return_value=mock_embedding_response)
+def mock_embedding_function(model, input):
+    """Mock embedding function that returns embeddings based on input size."""
+    texts = input if isinstance(input, list) else [input]
+    embeddings = []
+    for i in range(len(texts)):
+        embeddings.append({
+            "embedding": [0.1 * (i+1), 0.2 * (i+1), 0.3 * (i+1), 0.4 * (i+1), 0.5 * (i+1)]
+        })
+    
+    response = MagicMock()
+    response.data = embeddings
+    response.model = model
+    response.usage = MagicMock()
+    response.usage.prompt_tokens = len(texts) * 5
+    response.usage.total_tokens = len(texts) * 5
+    return response
+
+mock_litellm.embedding = MagicMock(side_effect=mock_embedding_function)
 
 
 class TestVectorAPI:
@@ -239,5 +247,4 @@ class TestEmbeddingEndpoint:
         assert "Failed to generate embeddings" in response.json()["detail"]
         
         # Reset the side effect for other tests
-        mock_litellm.embedding.side_effect = None
-        mock_litellm.embedding.return_value = mock_embedding_response
+        mock_litellm.embedding.side_effect = mock_embedding_function
