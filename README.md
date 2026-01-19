@@ -327,6 +327,51 @@ claude mcp add --scope user codenav uv run codenav
 
 ## Configuration Options
 
+### HTTP Server / REST API
+
+CodeNav includes a REST API server for code graph analysis and embeddings. Start the server with:
+
+```bash
+# Install with web dependencies
+pip install 'codenav[web]'
+
+# Start the HTTP server
+codenav-web --project-root /path/to/project --port 8000
+```
+
+The server provides:
+- Code graph analysis endpoints at `/api/graph/*`
+- Embedding generation endpoint at `/api/vector/embedding`
+- WebSocket support for real-time updates
+- Interactive API docs at `/docs`
+
+#### Embedding Endpoint
+
+Generate embeddings for text using LiteLLM (supports OpenAI, Azure OpenAI, Ollama, and more):
+
+```bash
+# Example: Generate embeddings
+curl -X POST http://localhost:8000/api/vector/embedding \
+  -H "Content-Type: application/json" \
+  -d '{
+    "input": ["text to embed", "another text"],
+    "model": "text-embedding-3-small"
+  }'
+
+# Response:
+# {
+#   "object": "list",
+#   "data": [
+#     {"object": "embedding", "index": 0, "embedding": [0.1, 0.2, ...]},
+#     {"object": "embedding", "index": 1, "embedding": [0.3, 0.4, ...]}
+#   ],
+#   "model": "text-embedding-3-small",
+#   "usage": {"prompt_tokens": 10, "total_tokens": 10}
+# }
+```
+
+Configuration via environment variables (see Environment Variables section below).
+
 ### Command Line Arguments
 
 ```bash
@@ -346,6 +391,13 @@ export CODENAV_CACHE_SIZE=500000
 export CODENAV_MAX_FILES=10000
 export CODENAV_FILE_WATCHER=true
 export CODENAV_DEBOUNCE_DELAY=2.0
+
+# Embedding API Configuration (for web server)
+export LITELLM_EMBEDDING_MODEL=text-embedding-3-small  # Default embedding model
+export OPENAI_API_KEY=your_openai_key                  # For OpenAI embeddings
+export AZURE_API_KEY=your_azure_key                    # For Azure OpenAI embeddings
+export AZURE_API_BASE=https://your-resource.openai.azure.com
+export AZURE_API_VERSION=2023-05-15
 ```
 
 ### File Watcher (v1.1.0+)
