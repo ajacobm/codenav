@@ -101,11 +101,19 @@ def create_vector_api_router() -> APIRouter:
             # Extract embeddings from response
             embeddings_data = []
             for idx, embedding_obj in enumerate(response.data):
+                # Handle both dict and object-style access for LiteLLM response
+                embedding_vector = (
+                    embedding_obj.get("embedding") if isinstance(embedding_obj, dict)
+                    else getattr(embedding_obj, "embedding", None)
+                )
+                if embedding_vector is None:
+                    raise ValueError(f"Invalid embedding format at index {idx}")
+                
                 embeddings_data.append(
                     EmbeddingObject(
                         object="embedding",
                         index=idx,
-                        embedding=embedding_obj["embedding"]
+                        embedding=embedding_vector
                     )
                 )
             
