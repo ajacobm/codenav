@@ -13,6 +13,9 @@ from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
 
+# Default embedding model if not specified in environment or request
+DEFAULT_EMBEDDING_MODEL = "text-embedding-3-small"
+
 
 class EmbeddingRequest(BaseModel):
     """Request model for embedding generation."""
@@ -79,7 +82,7 @@ def create_vector_api_router() -> APIRouter:
                 )
             
             # Determine model to use
-            model = request.model or os.environ.get("LITELLM_EMBEDDING_MODEL", "text-embedding-3-small")
+            model = request.model or os.environ.get("LITELLM_EMBEDDING_MODEL", DEFAULT_EMBEDDING_MODEL)
             
             # Normalize input to list
             texts = request.input if isinstance(request.input, list) else [request.input]
