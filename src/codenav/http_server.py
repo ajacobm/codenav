@@ -18,6 +18,7 @@ from fastapi.responses import JSONResponse
 from .cdc_manager import CDCManager
 from .server.analysis_engine import UniversalAnalysisEngine
 from .server.graph_api import create_graph_api_router
+from .server.vector_api import create_vector_api_router
 from .websocket_server import create_websocket_router, setup_cdc_broadcaster
 
 logger = logging.getLogger(__name__)
@@ -87,6 +88,9 @@ class GraphAPIServer:
                 setattr(self.engine.graph, 'cdc_manager', self.cdc_manager)
                 
                 self.app.include_router(create_graph_api_router(self.engine))
+                
+                # Add vector/embedding API router
+                self.app.include_router(create_vector_api_router())
                 
                 ws_router = create_websocket_router(self.cdc_manager)
                 self.app.include_router(ws_router)
@@ -161,7 +165,8 @@ class GraphAPIServer:
                     "traverse": "/api/graph/traverse (POST)",
                     "search_nodes": "/api/graph/nodes/search",
                     "get_seams": "/api/graph/seams",
-                    "call_chain": "/api/graph/call-chain/{start_node}"
+                    "call_chain": "/api/graph/call-chain/{start_node}",
+                    "embedding": "/api/vector/embedding (POST)"
                 }
             })
     

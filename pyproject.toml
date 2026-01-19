@@ -69,6 +69,7 @@ web = [
     "uvicorn[standard]>=0.24.0",
     "pydantic>=2.5.0",
     "httpx>=0.24.0",
+    "litellm>=1.61.15",
 ]
 
 # Jupyter notebook support
